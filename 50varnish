@@ -1,0 +1,3 @@
+Package: varnishkafka librdkafka1 varnish libvarnishapi1 varnish-modules
+Pin: release o=Camptocamp
+Pin-Priority: 1100
