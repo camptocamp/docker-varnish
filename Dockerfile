@@ -27,3 +27,5 @@ RUN set -x \
  && rm -rf /var/lib/apt/lists/*
 
 ADD vcl-reload.sh /usr/local/sbin/
+
+ADD varnishkafka.conf /etc/
