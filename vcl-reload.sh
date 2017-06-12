@@ -15,5 +15,5 @@ for vcl in $(varnishadm -n "$INSTANCE" vcl.list | awk '!/^active/ { print $4 }')
     varnishadm -n "$INSTANCE" vcl.discard "${vcl}"
 done
 
-varnishadm -n "$INSTANCE" vcl.load "${NAME}" "${DEST}/vcl/qoqa4.vcl"
+varnishadm -n "$INSTANCE" vcl.load "${NAME}" "${DEST}/vcl/custom.vcl"
 varnishadm -n "$INSTANCE" vcl.use "${NAME}"
