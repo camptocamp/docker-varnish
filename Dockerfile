@@ -29,4 +29,4 @@ RUN set -x \
 ADD vcl-reload.sh /usr/local/sbin/
 ADD varnish-logger.sh /usr/local/sbin/
 
-ADD varnishkafka.conf /etc/
+ADD varnishkafka.conf /etc/varnishkafka/
