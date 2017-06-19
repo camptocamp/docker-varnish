@@ -1,7 +1,7 @@
 #!/bin/sh -e
 
 INSTANCE='varnishd'
-NAME="qoqa-$(date +%F_%H%M%S)"
+NAME="vcl-$(date +%F_%H%M%S)"
 
 SOURCE="/usr/src/varnish/"
 DEST="/etc/varnish/"
