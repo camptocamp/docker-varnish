@@ -13,7 +13,13 @@ RUN set -x \
  && apt-get -y install \
     gnupg \
     dirmngr \
- && apt-key adv --keyserver hkps.pool.sks-keyservers.net --recv-keys 0xF4831166EFDCBABE \
+ && for server in $(shuf -e ha.pool.sks-keyservers.net \
+                            hkp://p80.pool.sks-keyservers.net:80 \
+                            keyserver.ubuntu.com \
+                            hkp://keyserver.ubuntu.com:80 \
+                            pgp.mit.edu) ; do \
+        apt-key adv --keyserver "${server}" --recv-keys 0xF4831166EFDCBABE && break || : ; \
+    done \
  && echo "deb http://pkg.camptocamp.net/apt stretch/dev sysadmin varnish-5.0" > /etc/apt/sources.list.d/camptocamp.list \
  && apt-get update \
  && apt-get -y install \
