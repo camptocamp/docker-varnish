@@ -17,3 +17,5 @@ done
 
 varnishadm -n "$INSTANCE" vcl.load "${NAME}" "${DEST}/vcl/custom.vcl"
 varnishadm -n "$INSTANCE" vcl.use "${NAME}"
+
+varnishadm -n "$INSTANCE" < "${DEST}/settings.cli"
