@@ -20,11 +20,10 @@ RUN set -x \
                             pgp.mit.edu) ; do \
         apt-key adv --keyserver "${server}" --recv-keys 0xF4831166EFDCBABE && break || : ; \
     done \
- && echo "deb http://pkg.camptocamp.net/apt stretch/dev sysadmin varnish-5.0" > /etc/apt/sources.list.d/camptocamp.list \
+ && echo "deb http://pkg.camptocamp.net/apt stretch/dev sysadmin varnish-5.1" > /etc/apt/sources.list.d/camptocamp.list \
  && apt-get update \
  && apt-get -y install \
-    varnish \
-    varnishkafka \
+    varnish=5.1.3-1~stretch \
     rsync \
  && apt-get purge -y --auto-remove \
     gnupg \
