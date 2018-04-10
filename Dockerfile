@@ -13,6 +13,7 @@ RUN set -x \
  && apt-get -y install \
     gnupg \
     dirmngr \
+    inotify-tools \
  && for server in $(shuf -e ha.pool.sks-keyservers.net \
                             hkp://p80.pool.sks-keyservers.net:80 \
                             keyserver.ubuntu.com \
@@ -32,4 +33,5 @@ RUN set -x \
  && rm -rf /var/lib/apt/lists/*
 
 ADD vcl-reload.sh /usr/local/sbin/
+ADD vcl-reload-persistent.sh /usr/local/sbin/
 ADD varnish-logger.sh /usr/local/sbin/
