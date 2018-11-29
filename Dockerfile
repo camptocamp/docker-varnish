@@ -7,6 +7,7 @@ RUN echo 'APT::Install-Suggests "0";' > /etc/apt/apt.conf.d/50no-install-suggest
 
 COPY 50varnish /etc/apt/preferences.d/
 
+# install varnish
 RUN set -x \
  && apt-get update \
  && apt-get -y upgrade \
@@ -32,6 +33,37 @@ RUN set -x \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
 
+
+# build & install collectd
+RUN set -x \
+ && apt-get update \
+ && apt-get -y install \
+    build-essential dpkg-dev autoconf automake bison flex libtool \
+    ca-certificates \
+    git \
+    libmicrohttpd-dev \
+    libprotobuf-c-dev protobuf-c-compiler \
+    libyajl-dev \
+    varnish-dev \
+    libmicrohttpd12 \
+    libprotobuf-c1 \
+    libyajl2 \
+ && git clone https://github.com/collectd/collectd/ -b collectd-5.8 \
+ && cd collectd && ./build.sh \
+ && ./configure --enable-debug --disable-all-plugins --prefix=/usr/local CFLAGS="$(dpkg-buildflags --get CFLAGS) -Wall" CPPLAGS="$(dpkg-buildflags --get CPPFLAGS)" LDFLAGS="$(dpkg-buildflags --get LDFLAGS)" --enable-write_prometheus --enable-varnish --enable-unixsock --enable-log_logstash \
+ && make && make check && make install && cd .. \
+ && apt-get purge -y --auto-remove \
+    build-essential dpkg-dev autoconf automake bison flex libtool \
+    ca-certificates \
+    git \
+    libmicrohttpd-dev \
+    libprotobuf-c-dev protobuf-c-compiler \
+    libyajl-dev \
+    varnish-dev \
+ && apt-get clean \
+ && rm -rf /var/lib/apt/lists/* collectd/
+
 ADD vcl-reload.sh /usr/local/sbin/
 ADD vcl-reload-persistent.sh /usr/local/sbin/
 ADD varnish-logger.sh /usr/local/sbin/
+ADD collectd.conf /usr/local/etc/
