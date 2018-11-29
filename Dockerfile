@@ -1,5 +1,11 @@
 FROM debian:stretch-slim
 
+ENV VARNISH_VERSION=5.1.3-1~stretch \
+    COLLECTD_REPO=https://github.com/collectd/collectd/ \
+    COLLECTD_TAG=collectd-5.8 \
+    VARNISHKAFKA_REPO=https://github.com/camptocamp/varnishkafka/ \
+    VARNISHKAFKA_TAG=merged-statsfile
+
 ENV DEBIAN_FRONTEND noninteractive
 
 RUN echo 'APT::Install-Recommends "0";' > /etc/apt/apt.conf.d/50no-install-recommends
@@ -29,7 +35,7 @@ RUN set -x \
  && echo "deb http://pkg.camptocamp.net/apt stretch/dev sysadmin varnish-5.1" > /etc/apt/sources.list.d/camptocamp.list \
  && apt-get update \
  && apt-get -y install \
-    varnish=5.1.3-1~stretch \
+    varnish=$VARNISH_VERSION \
     rsync \
  && apt-get purge -y --auto-remove \
     gnupg \
@@ -48,11 +54,11 @@ RUN set -x \
     libmicrohttpd-dev \
     libprotobuf-c-dev protobuf-c-compiler \
     libyajl-dev \
-    varnish-dev \
+    varnish-dev=$VARNISH_VERSION \
     libmicrohttpd12 \
     libprotobuf-c1 \
     libyajl2 \
- && git clone https://github.com/collectd/collectd/ -b collectd-5.8 \
+ && git clone $COLLECTD_REPO -b $COLLECTD_TAG \
  && cd collectd && ./build.sh \
  && ./configure --enable-debug --disable-all-plugins --prefix=/usr/local CFLAGS="$(dpkg-buildflags --get CFLAGS) -Wall" CPPLAGS="$(dpkg-buildflags --get CPPFLAGS)" LDFLAGS="$(dpkg-buildflags --get LDFLAGS)" --enable-write_prometheus --enable-varnish --enable-unixsock --enable-log_logstash \
  && make && make check && make install && cd .. \
@@ -78,9 +84,9 @@ RUN set -x \
     libyajl-dev \
     librdkafka1 \
     libyajl2 \
-    varnish-dev \
+    varnish-dev=$VARNISH_VERSION \
     zlib1g-dev \
- && git clone https://github.com/camptocamp/varnishkafka/ -b merged-statsfile \
+ && git clone $VARNISHKAFKA_REPO -b $VARNISHKAFKA_TAG \
  && cd varnishkafka \
  && make && make install && cd .. \
  && apt-get purge -y --auto-remove \
