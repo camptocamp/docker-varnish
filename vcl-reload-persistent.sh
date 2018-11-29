@@ -1,8 +1,8 @@
 #!/bin/bash
 CONFDIR="/etc/varnish"
 
-: ${VCLFILE?"Variable must be define for script to work."}
-: ${INSTANCE?"Variable must be define for script to work."}
+: ${VCLFILE?"Variable must be defined for script to work."}
+: ${INSTANCE?"Variable must be defined for script to work."}
 
 if [ ! -d "$CONFDIR" ]; then
   echo "$CONFDIR must be a directory for script to work"
