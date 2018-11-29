@@ -15,6 +15,10 @@ RUN set -x \
     gnupg \
     dirmngr \
     inotify-tools \
+    curl \
+    socat \
+    procps \
+    netcat-openbsd \
  && for server in $(shuf -e ha.pool.sks-keyservers.net \
                             hkp://p80.pool.sks-keyservers.net:80 \
                             keyserver.ubuntu.com \
