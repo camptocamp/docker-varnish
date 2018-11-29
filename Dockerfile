@@ -67,6 +67,33 @@ RUN set -x \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/* collectd/
 
+# build & install varnishkafka
+RUN set -x \
+ && apt-get update \
+ && apt-get -y install \
+    build-essential \
+    ca-certificates \
+    git \
+    librdkafka-dev \
+    libyajl-dev \
+    librdkafka1 \
+    libyajl2 \
+    varnish-dev \
+    zlib1g-dev \
+ && git clone https://github.com/camptocamp/varnishkafka/ -b merged-statsfile \
+ && cd varnishkafka \
+ && make && make install && cd .. \
+ && apt-get purge -y --auto-remove \
+    build-essential \
+    ca-certificates \
+    git \
+    librdkafka-dev \
+    libyajl-dev \
+    varnish-dev \
+    zlib1g-dev \
+ && apt-get clean \
+ && rm -rf /var/lib/apt/lists/* varnishkafka/
+
 ADD vcl-reload.sh /usr/local/sbin/
 ADD vcl-reload-persistent.sh /usr/local/sbin/
 ADD varnish-logger.sh /usr/local/sbin/
