@@ -1,10 +1,10 @@
 FROM debian:stretch-slim
 
-ENV VARNISH_VERSION=5.1.3-1~stretch \
+ENV VARNISH_VERSION=6.3.1-1~stretch \
     COLLECTD_REPO=https://github.com/collectd/collectd/ \
-    COLLECTD_TAG=collectd-5.8 \
+    COLLECTD_TAG=collectd-5.9 \
     VARNISHKAFKA_REPO=https://github.com/camptocamp/varnishkafka/ \
-    VARNISHKAFKA_TAG=merged-statsfile
+    VARNISHKAFKA_TAG=master
 
 ENV DEBIAN_FRONTEND noninteractive
 
@@ -32,7 +32,7 @@ RUN set -x \
                             pgp.mit.edu) ; do \
         apt-key adv --keyserver "${server}" --recv-keys 0xF4831166EFDCBABE && break || : ; \
     done \
- && echo "deb http://pkg.camptocamp.net/apt stretch/dev sysadmin varnish-5.1" > /etc/apt/sources.list.d/camptocamp.list \
+ && echo "deb http://pkg.camptocamp.net/apt stretch/dev sysadmin varnish-6.3" > /etc/apt/sources.list.d/camptocamp.list \
  && apt-get update \
  && apt-get -y install \
     varnish=$VARNISH_VERSION \
