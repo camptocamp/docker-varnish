@@ -22,6 +22,7 @@ RUN set -x \
     dirmngr \
     inotify-tools \
     curl \
+    jq \
     socat \
     procps \
     netcat-openbsd \
