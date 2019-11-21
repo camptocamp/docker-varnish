@@ -10,7 +10,7 @@ rsync -av --delete "$SOURCE" "$DEST"
 
 varnishadm -n "$INSTANCE" ping || exit 0
 
-for vcl in $(varnishadm -n "$INSTANCE" vcl.list -j | jq -r '.[] | objects | select(.status != "active" and .temperature != "cold") | .name'); do
+for vcl in $(varnishadm -n "$INSTANCE" vcl.list -j | jq -r '.[] | objects | select(.status != "active" and .busy == 0) | .name'); do
     echo "cleaning vcl file '${vcl}'"
     varnishadm -n "$INSTANCE" vcl.discard "${vcl}"
 done
