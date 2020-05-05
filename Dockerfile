@@ -1,6 +1,8 @@
 FROM debian:stretch-slim
 
 ENV VARNISH_VERSION=6.3.1-1~stretch \
+    LIBVMOD_DYNAMIC_REPO=https://github.com/nigoroll/libvmod-dynamic/ \
+    LIBVMOD_DYNAMIC_TAG=master \
     COLLECTD_REPO=https://github.com/collectd/collectd/ \
     COLLECTD_TAG=collectd-5.9 \
     VARNISHKAFKA_REPO=https://github.com/camptocamp/varnishkafka/ \
@@ -44,6 +46,29 @@ RUN set -x \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
 
+# build & install libvmod-dynamic
+RUN set -x \
+ && apt-get update \
+ && apt-get -y install \
+    build-essential dpkg-dev autoconf automake bison flex libtool \
+    ca-certificates \
+    git \
+    python3-docutils \
+    libgetdns-dev \
+    varnish-dev=$VARNISH_VERSION \
+    libgetdns1 \
+ && git clone $LIBVMOD_DYNAMIC_REPO -b $LIBVMOD_DYNAMIC_TAG \
+ && cd libvmod-dynamic && ./autogen.sh \
+ && ./configure && make && make install && cd .. \
+ && apt-get purge -y --auto-remove \
+    build-essential dpkg-dev autoconf automake bison flex libtool \
+    ca-certificates \
+    git \
+    python3-docutils \
+    libgetdns-dev \
+    varnish-dev \
+ && apt-get clean \
+ && rm -rf /var/lib/apt/lists/*
 
 # build & install collectd
 RUN set -x \
