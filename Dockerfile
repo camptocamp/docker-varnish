@@ -18,13 +18,17 @@ RUN set -x \
  && apt-get update \
  && apt-get -y upgrade \
  && apt-get -y install \
+    ca-certificates \
+    git \
     gnupg \
     dirmngr \
     inotify-tools \
     curl \
     jq \
+    less \
     socat \
     procps \
+    rsync \
     netcat-openbsd \
  && for server in $(shuf -e ha.pool.sks-keyservers.net \
                             hkp://p80.pool.sks-keyservers.net:80 \
@@ -37,7 +41,6 @@ RUN set -x \
  && apt-get update \
  && apt-get -y install \
     varnish=$VARNISH_VERSION \
-    rsync \
  && apt-get purge -y --auto-remove \
     gnupg \
     dirmngr \
@@ -50,8 +53,6 @@ RUN set -x \
  && apt-get update \
  && apt-get -y install \
     build-essential dpkg-dev autoconf automake bison flex libtool \
-    ca-certificates \
-    git \
     libmicrohttpd-dev \
     libprotobuf-c-dev protobuf-c-compiler \
     libyajl-dev \
@@ -65,8 +66,6 @@ RUN set -x \
  && make && make check && make install && cd .. \
  && apt-get purge -y --auto-remove \
     build-essential dpkg-dev autoconf automake bison flex libtool \
-    ca-certificates \
-    git \
     libmicrohttpd-dev \
     libprotobuf-c-dev protobuf-c-compiler \
     libyajl-dev \
@@ -79,8 +78,6 @@ RUN set -x \
  && apt-get update \
  && apt-get -y install \
     build-essential \
-    ca-certificates \
-    git \
     librdkafka-dev \
     libyajl-dev \
     librdkafka1 \
@@ -92,8 +89,6 @@ RUN set -x \
  && make && make install && cd .. \
  && apt-get purge -y --auto-remove \
     build-essential \
-    ca-certificates \
-    git \
     librdkafka-dev \
     libyajl-dev \
     varnish-dev \
