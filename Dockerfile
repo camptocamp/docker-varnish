@@ -56,8 +56,6 @@ RUN set -x \
  && apt-get update \
  && apt-get -y install \
     build-essential dpkg-dev autoconf automake bison flex libtool \
-    ca-certificates \
-    git \
     python3-docutils \
     libgetdns-dev \
     varnish-dev=$VARNISH_VERSION \
@@ -67,8 +65,6 @@ RUN set -x \
  && ./configure && make && make install && cd .. \
  && apt-get purge -y --auto-remove \
     build-essential dpkg-dev autoconf automake bison flex libtool \
-    ca-certificates \
-    git \
     python3-docutils \
     libgetdns-dev \
     varnish-dev \
