@@ -4,7 +4,9 @@ ENV VARNISH_VERSION=6.3.1-1~stretch \
     COLLECTD_REPO=https://github.com/collectd/collectd/ \
     COLLECTD_TAG=collectd-5.9 \
     VARNISHKAFKA_REPO=https://github.com/camptocamp/varnishkafka/ \
-    VARNISHKAFKA_TAG=master
+    VARNISHKAFKA_TAG=master \
+    PROMETHEUS_EXPORTER_RELEASE=1.5.2 \
+    PROMETHEUS_EXPORTER_CHECKSUM=3ee8c4c59aea1c341b9f4750950f24c8e6d9670ae39ed44af273f08ea318ede8
 
 ENV DEBIAN_FRONTEND noninteractive
 
@@ -95,6 +97,16 @@ RUN set -x \
     zlib1g-dev \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/* varnishkafka/
+
+# install prometheus exporter
+RUN set -x \
+ && curl -sLo prometheus_varnish_exporter.tar.gz https://github.com/jonnenauha/prometheus_varnish_exporter/releases/download/$PROMETHEUS_EXPORTER_RELEASE/prometheus_varnish_exporter-$PROMETHEUS_EXPORTER_RELEASE.linux-amd64.tar.gz \
+ && echo $PROMETHEUS_EXPORTER_CHECKSUM  prometheus_varnish_exporter.tar.gz | sha256sum -c \
+ && tar -xzvf prometheus_varnish_exporter.tar.gz prometheus_varnish_exporter-$PROMETHEUS_EXPORTER_RELEASE.linux-amd64/prometheus_varnish_exporter \
+ && mv prometheus_varnish_exporter-$PROMETHEUS_EXPORTER_RELEASE.linux-amd64/prometheus_varnish_exporter /usr/local/bin \
+ && chmod +x /usr/local/bin/prometheus_varnish_exporter \
+ && rmdir prometheus_varnish_exporter-$PROMETHEUS_EXPORTER_RELEASE.linux-amd64/ \
+ && rm -f prometheus_varnish_exporter.tar.gz
 
 ADD vcl-reload.sh /usr/local/sbin/
 ADD vcl-reload-persistent.sh /usr/local/sbin/
