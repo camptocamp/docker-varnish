@@ -1,0 +1,31 @@
+# /!\ KEEP THE BASE IMAGE IN SYNC ACROSS ALL DOCKERFILES /!\
+FROM varnish:6.4.0-1
+
+ARG VARNISHKAFKA_REPO=https://github.com/camptocamp/varnishkafka/
+ARG VARNISHKAFKA_TAG=master
+
+RUN set -x \
+ && BUILD_DEPENDENCIES=" \
+    git \
+    build-essential \
+    librdkafka-dev \
+    libyajl-dev \
+    varnish-dev=$VARNISH_VERSION \
+    zlib1g-dev" \
+ && apt-get update \
+ && apt-get -y install \
+    librdkafka1 \
+    libyajl2 \
+ && apt-get -y install --no-install-recommends $BUILD_DEPENDENCIES \
+ && tmp=$(mktemp -d) \
+ && cd $tmp \
+ && git clone $VARNISHKAFKA_REPO -b $VARNISHKAFKA_TAG \
+ && cd varnishkafka \
+ && make && make install \
+ && cd \
+ && rm -rf $tmp \
+ && apt-get purge -y --auto-remove $BUILD_DEPENDENCIES \
+ && apt-get clean \
+ && rm -rf /var/lib/apt/lists/*
+
+ENTRYPOINT [ "/usr/local/bin/varnishkafka" ]

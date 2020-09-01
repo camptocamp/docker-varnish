@@ -1,0 +1,37 @@
+# /!\ KEEP THE BASE IMAGE IN SYNC ACROSS ALL DOCKERFILES /!\
+FROM varnish:6.4.0-1
+
+ARG COLLECTD_REPO=https://github.com/collectd/collectd/
+ARG COLLECTD_TAG=collectd-5.9
+
+RUN set -x \
+ && BUILD_DEPENDENCIES=" \
+    git \
+    build-essential dpkg-dev autoconf automake bison flex libtool pkg-config \
+    libprotobuf-c-dev protobuf-c-compiler \
+    libmicrohttpd-dev \
+    libyajl-dev \
+    varnish-dev=$VARNISH_VERSION" \
+ && apt-get update \
+ && apt-get -y install \
+    curl \
+    libprotobuf-c1 \
+    libmicrohttpd12 \
+    libyajl2 \
+ && apt-get -y install --no-install-recommends $BUILD_DEPENDENCIES \
+ && tmp=$(mktemp -d) \
+ && cd $tmp \
+ && git clone $COLLECTD_REPO -b $COLLECTD_TAG \
+ && cd collectd \
+ && ./build.sh \
+ && ./configure --enable-debug --disable-all-plugins --prefix=/usr/local CFLAGS="$(dpkg-buildflags --get CFLAGS) -Wall" CPPLAGS="$(dpkg-buildflags --get CPPFLAGS)" LDFLAGS="$(dpkg-buildflags --get LDFLAGS)" --enable-write_prometheus --enable-varnish --enable-unixsock --enable-log_logstash \
+ && make && make check && make install \
+ && cd \
+ && rm -rf $tmp \
+ && apt-get purge -y --auto-remove $BUILD_DEPENDENCIES \
+ && apt-get clean \
+ && rm -rf /var/lib/apt/lists/*
+
+ADD collectd.conf /usr/local/etc/
+
+ENTRYPOINT [ "/usr/local/sbin/collectd" ]

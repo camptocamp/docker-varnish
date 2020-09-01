@@ -1,0 +1,24 @@
+# /!\ KEEP THE BASE IMAGE IN SYNC ACROSS ALL DOCKERFILES /!\
+FROM varnish:6.4.0-1
+
+ARG PROMETHEUS_EXPORTER_RELEASE=1.5.2
+ARG PROMETHEUS_EXPORTER_CHECKSUM=3ee8c4c59aea1c341b9f4750950f24c8e6d9670ae39ed44af273f08ea318ede8
+
+RUN set -x \
+ && apt-get update \
+ && apt-get -y install curl \
+ && tmp=$(mktemp -d) \
+ && cd $tmp \
+ && curl -sLo prometheus_varnish_exporter.tar.gz https://github.com/jonnenauha/prometheus_varnish_exporter/releases/download/$PROMETHEUS_EXPORTER_RELEASE/prometheus_varnish_exporter-$PROMETHEUS_EXPORTER_RELEASE.linux-amd64.tar.gz \
+ && echo $PROMETHEUS_EXPORTER_CHECKSUM  prometheus_varnish_exporter.tar.gz | sha256sum -c \
+ && tar -xzvf prometheus_varnish_exporter.tar.gz prometheus_varnish_exporter-$PROMETHEUS_EXPORTER_RELEASE.linux-amd64/prometheus_varnish_exporter \
+ && mv prometheus_varnish_exporter-$PROMETHEUS_EXPORTER_RELEASE.linux-amd64/prometheus_varnish_exporter /usr/local/bin \
+ && chmod +x /usr/local/bin/prometheus_varnish_exporter \
+ && cd \
+ && rm -rf $tmp \
+ && apt-get clean \
+ && rm -rf /var/lib/apt/lists/* \
+ && unset PROMETHEUS_EXPORTER_RELEASE \
+ && unset PROMETHEUS_EXPORTER_CHECKSUM
+
+ENTRYPOINT [ "/usr/local/bin/prometheus_varnish_exporter" ]
