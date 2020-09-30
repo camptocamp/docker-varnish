@@ -1,5 +1,5 @@
 # /!\ KEEP THE BASE IMAGE IN SYNC ACROSS ALL DOCKERFILES /!\
-FROM varnish:6.4.0-1
+FROM varnish:6.5.1-1
 
 ARG COLLECTD_REPO=https://github.com/collectd/collectd/
 ARG COLLECTD_TAG=collectd-5.9
