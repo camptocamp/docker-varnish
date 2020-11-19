@@ -1,3 +1,13 @@
+FROM golang:1.14.10 as builder
+
+RUN set -x \
+ && cd src \
+ && git clone https://github.com/jonnenauha/prometheus_varnish_exporter.git \
+ && cd prometheus_varnish_exporter \
+ && git fetch origin pull/64/head \
+ && git checkout 46fa8a3f800d8cc2e0c95d0582aee50602f53633 \
+ && ./build.sh 1.5.2+varnish_6.3
+
 FROM debian:stretch-slim
 
 ENV VARNISH_VERSION=6.3.1-1~stretch \
@@ -99,14 +109,7 @@ RUN set -x \
  && rm -rf /var/lib/apt/lists/* varnishkafka/
 
 # install prometheus exporter
-RUN set -x \
- && curl -sLo prometheus_varnish_exporter.tar.gz https://github.com/jonnenauha/prometheus_varnish_exporter/releases/download/$PROMETHEUS_EXPORTER_RELEASE/prometheus_varnish_exporter-$PROMETHEUS_EXPORTER_RELEASE.linux-amd64.tar.gz \
- && echo $PROMETHEUS_EXPORTER_CHECKSUM  prometheus_varnish_exporter.tar.gz | sha256sum -c \
- && tar -xzvf prometheus_varnish_exporter.tar.gz prometheus_varnish_exporter-$PROMETHEUS_EXPORTER_RELEASE.linux-amd64/prometheus_varnish_exporter \
- && mv prometheus_varnish_exporter-$PROMETHEUS_EXPORTER_RELEASE.linux-amd64/prometheus_varnish_exporter /usr/local/bin \
- && chmod +x /usr/local/bin/prometheus_varnish_exporter \
- && rmdir prometheus_varnish_exporter-$PROMETHEUS_EXPORTER_RELEASE.linux-amd64/ \
- && rm -f prometheus_varnish_exporter.tar.gz
+COPY --from=builder /go/src/prometheus_varnish_exporter/bin/build/prometheus_varnish_exporter-1.5.2+varnish_6.3.linux-amd64/prometheus_varnish_exporter /usr/local/bin/
 
 ADD vcl-reload.sh /usr/local/sbin/
 ADD vcl-reload-persistent.sh /usr/local/sbin/
