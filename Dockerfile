@@ -1,6 +1,8 @@
 # /!\ KEEP THE BASE IMAGE IN SYNC ACROSS ALL DOCKERFILES /!\
 FROM docker.io/varnish:7.1.1
 
+USER root
+
 RUN set -x \
  && apt-get update \
  && apt-get -y install \
@@ -11,5 +13,7 @@ RUN set -x \
     netcat-openbsd \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
+
+USER varnish
 
 ADD varnish-configuration-loader /usr/local/sbin/
