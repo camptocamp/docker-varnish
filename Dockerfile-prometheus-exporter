@@ -1,8 +1,8 @@
-FROM docker.io/golang:1.14.10 as downloader
+FROM docker.io/curlimages/curl:7.86.0 as downloader
 ARG varnish_exporter_version="1.6.1"
 
 RUN set -x \
- && cd src \
+ && cd /tmp \
  && curl -L https://github.com/jonnenauha/prometheus_varnish_exporter/releases/download/$varnish_exporter_version/prometheus_varnish_exporter-$varnish_exporter_version.linux-amd64.tar.gz --output prometheus_varnish_exporter.tar.gz \
  && tar -xzf prometheus_varnish_exporter.tar.gz \
  && mv prometheus_varnish_exporter-$varnish_exporter_version.linux-amd64/prometheus_varnish_exporter .
@@ -10,6 +10,6 @@ RUN set -x \
 # /!\ KEEP THE BASE IMAGE IN SYNC ACROSS ALL DOCKERFILES /!\
 FROM docker.io/varnish:7.1.1
 
-COPY --from=downloader /go/src/prometheus_varnish_exporter /usr/local/bin/
+COPY --from=downloader /tmp/prometheus_varnish_exporter /usr/local/bin/
 
 ENTRYPOINT [ "/usr/local/bin/prometheus_varnish_exporter" ]
