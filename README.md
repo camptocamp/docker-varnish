@@ -12,6 +12,4 @@ Clone the repository and :
 
     docker build . -t varnish:7.1.1_c2c.1
 
-    docker build -f Dockerfile-varnishkafka . -t varnish:7.1.1_varnishkafka.1
-
     docker build --build-arg varnish_exporter_version=1.6.1 -f Dockerfile-prometheus-exporter . -t varnish:7.1.1_prometheus-exporter.1.6.1
