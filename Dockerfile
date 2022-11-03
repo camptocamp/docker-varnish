@@ -1,5 +1,5 @@
 # /!\ KEEP THE BASE IMAGE IN SYNC ACROSS ALL DOCKERFILES /!\
-FROM docker.io/varnish:7.1.1
+FROM docker.io/varnish:7.2.0
 
 USER root
 
