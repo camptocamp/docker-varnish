@@ -1,4 +1,4 @@
-FROM golang:1.14.10 as downloader
+FROM docker.io/golang:1.14.10 as downloader
 ARG varnish_exporter_version="1.6.1"
 
 RUN set -x \
@@ -8,7 +8,7 @@ RUN set -x \
  && mv prometheus_varnish_exporter-$varnish_exporter_version.linux-amd64/prometheus_varnish_exporter .
 
 # /!\ KEEP THE BASE IMAGE IN SYNC ACROSS ALL DOCKERFILES /!\
-FROM varnish:7.1.1
+FROM docker.io/varnish:7.1.1
 
 COPY --from=downloader /go/src/prometheus_varnish_exporter /usr/local/bin/
 
