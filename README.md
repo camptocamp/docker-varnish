@@ -10,6 +10,6 @@ Run a simple varnish service.
 
 Clone the repository and :
 
-    docker build . -t varnish:7.2.0_c2c.1
+    docker build . -t varnish:7.2.1_c2c.1
 
-    docker build -f Dockerfile-prometheus-exporter . -t varnish:7.2.0_prometheus-exporter.1.6.1
+    docker build -f Dockerfile-prometheus-exporter . -t varnish:7.2.1_prometheus-exporter.1.6.1
