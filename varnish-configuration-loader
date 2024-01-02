@@ -1,0 +1,171 @@
+#! /bin/sh
+
+print_usage()
+{
+	cat << EOF 1>&2
+Usage:
+	$(basename "$0") [ -n <varnish-instance-name> ] -I <varnish-cli-command-file> [ -i <reload-interval> ]
+EOF
+}
+
+getopt_output="$(getopt --name "$(basename $0)" --options "h,n:,I:,i:" -- "$@")"
+
+if [ $? -ne 0 ]
+then
+	printf "\n"
+	print_usage
+	exit 1
+fi
+
+eval set -- "${getopt_output}"
+
+while true
+do
+	case "$1"
+	in
+		"-h")
+			print_usage
+			exit 0
+		;;
+		"-n")
+			varnish_name="$2"
+			shift 2
+		;;
+		"-I")
+			cli_file="$(realpath --no-symlinks "$2")"
+			shift 2
+		;;
+		"-i")
+			interval="$2"
+			shift 2
+		;;
+		"--")
+			break
+		;;
+	esac
+done
+
+argument_error=false
+
+if [ -z "${cli_file}" ]
+then
+	printf -- "-I option is missing\n"
+	argument_error=true
+fi
+
+if ${argument_error}
+then
+	printf "\n"
+	print_usage
+	exit 1
+fi
+
+if [ ! -f "${cli_file}" ]
+then
+	printf "Varnish CLI command file ('%s') not found\n" "${cli_file}"
+	exit 1
+fi
+
+varnishadm_options=""
+
+if [ -n "${varnish_name}" ]
+then
+	varnishadm_options="${varnishadm_options} -n \"${varnish_name}\""
+fi
+
+_varnishadm() {
+	eval varnishadm ${varnishadm_options} "$@"
+}
+
+ping() {
+	until _varnishadm ${varnishadm_options} ping > /dev/null 2>&1
+	do
+		sleep 1
+	done
+}
+
+load_configuration() {
+	printf "Loading Varnish configuration\n"
+	while read "command"
+	do
+		if ! _varnishadm ${varnishadm_options} ${command}
+		then
+			printf "Failed loading Varnish configuration\n"
+			return 1
+		fi
+	done < "${cli_file}"
+	printf "Successfully loaded Varnish configuration\n"
+
+	if [ "$(_varnishadm ${varnishadm_options} status -j | jq -er ".[3]")" = "stopped" ]
+	then
+		printf "Starting Varnish\n"
+		if ! _varnishadm ${varnishadm_options} start
+		then
+			printf "Failed starting Varnish\n"
+			return 1
+		fi
+		printf "Successfully started Varnish\n"
+	fi
+
+	return 0
+}
+
+clean_configuration() {
+	if ! unused_labels="$(_varnishadm ${varnishadm_options} vcl.list -j | jq -er ".[3:] | map(select(.status == \"available\" and .state == \"label\" and .label.refs == null))")"
+	then
+		printf "Failed to retrieve unused Varnish configuration labels\n"
+		return 1
+	fi
+
+	for i in $(seq 0 $(echo "${unused_labels}" | jq "length - 1"))
+	do
+		label="$(echo "${unused_labels}" | jq -r ".[$i].name")"
+		printf "Discarding unused Varnish configuration label '${label}'\n"
+		_varnishadm ${varnishadm_options} vcl.discard "${label}"
+		printf "Successfully discarded unused Varnish configuration label\n"
+	done
+
+	if ! unused_files="$(_varnishadm ${varnishadm_options} vcl.list -j | jq -er ".[3:] | map(select(.status == \"available\" and .state != \"label\" and .labels == null))")"
+	then
+		printf "Failed to retrieve unused Varnish configuration files\n"
+		return 1
+	fi
+
+	for i in $(seq 0 $(echo "${unused_files}" | jq "length - 1"))
+	do
+		file="$(echo "${unused_files}" | jq -r ".[$i].name")"
+		printf "Discarding unused Varnish configuration file '${file}'\n"
+		_varnishadm ${varnishadm_options} vcl.discard "${file}"
+		printf "Successfully discarded unused Varnish configuration file\n"
+	done
+
+	return 0
+}
+
+printf "Waiting for Varnish to respond to ping\n"
+ping
+printf "Varnish successfully responded to ping\n"
+
+if [ -z "${interval}" ]
+then
+	load_configuration
+else
+	old_checksum=""
+
+	while true
+	do
+		checksum="$(sha256sum "${cli_file}")"
+
+		ping
+
+		if [ "${checksum}" != "${old_checksum}" ]
+		then
+			load_configuration
+			old_checksum="${checksum}"
+		fi
+
+		clean_configuration
+
+		sleep "${interval}"
+	done
+fi

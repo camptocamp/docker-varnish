@@ -1,6 +1,3 @@
-Varnish 5.0 docker image
-========================
+# Varnish container image
 
-[![By Camptocamp](https://img.shields.io/badge/by-camptocamp-fb7047.svg)](http://www.camptocamp.com)
-
-Run a simple varnish service.
+This image is based on the official Varnish image and adds a [Prometheus exporter](https://github.com/jonnenauha/prometheus_varnish_exporter) and a configuration reloader script.
