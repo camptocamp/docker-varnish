@@ -1,4 +1,4 @@
-FROM docker.io/curlimages/curl:7.86.0 as downloader
+FROM docker.io/curlimages/curl:8.5.0 as downloader
 ARG varnish_exporter_version="1.6.1"
 
 RUN set -x \
@@ -8,7 +8,7 @@ RUN set -x \
  && mv prometheus_varnish_exporter-$varnish_exporter_version.linux-amd64/prometheus_varnish_exporter .
 
 # /!\ KEEP THE BASE IMAGE IN SYNC ACROSS ALL DOCKERFILES /!\
-FROM docker.io/varnish:7.2.1
+FROM docker.io/varnish:7.4.2
 
 COPY --from=downloader /tmp/prometheus_varnish_exporter /usr/local/bin/
 
