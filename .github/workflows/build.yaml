@@ -28,7 +28,7 @@ jobs:
       - name: "Build container image"
         id: "build-image"
         run: |
-          dagger call publish --registry 'ghcr.io' --username '${{ github.actor }}' --password '${{ github.token }}' --repository '${{ github.repository_owner }}/varnish'" --tag '${{ github.ref_name }}'
+          dagger call publish --registry 'ghcr.io' --username '${{ github.actor }}' --password '${{ github.token }}' --repository '${{ github.repository_owner }}/varnish' --tag '${{ github.ref_name }}'
       - name: "Delete old container images"
         id: "delete-old-images"
         uses: "actions/delete-package-versions@v4"
