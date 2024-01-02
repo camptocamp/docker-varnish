@@ -1,0 +1,43 @@
+---
+name: "Build"
+
+on:
+  push:
+    tags:
+      - "*"
+
+permissions:
+  contents: "read"
+  id-token: "write"
+  packages: "write"
+
+jobs:
+  image:
+    name: "Container Image"
+    runs-on: "ubuntu-latest"
+    steps:
+      - name: "Checkout repository"
+        id: "checkout"
+        uses: "actions/checkout@v3"
+      - name: "Setup Dagger"
+        id: "setup-dagger"
+        uses: "./.github/actions/setup-dagger"
+        with:
+          cloudToken: "${{ secrets.DAGGER_CLOUD_TOKEN }}"
+          cacheServiceToken: "${{ secrets.DAGGER_CACHE_SERVICE_TOKEN }}"
+      - name: "Build container image"
+        id: "build-image"
+        run: |
+          dagger call publish --registry 'ghcr.io' --username '${{ github.actor }}' --password '${{ github.token }}' --repository '${{ github.repository_owner }}/varnish'" --tag '${{ github.ref_name }}'
+      - name: "Delete old container images"
+        id: "delete-old-images"
+        uses: "actions/delete-package-versions@v4"
+        with:
+          package-name: "varnish"
+          package-type: "container"
+          min-versions-to-keep: 0
+          delete-only-untagged-versions: true
+      # NOTE: Composite actions cannot add post steps, so add them explicitly.
+      - name: "Post Setup Dagger"
+        id: "post-setup-dagger"
+        uses: "./.github/actions/post-setup-dagger"
