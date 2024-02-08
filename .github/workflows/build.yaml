@@ -31,7 +31,7 @@ jobs:
           dagger call publish --registry 'ghcr.io' --username '${{ github.actor }}' --password '${{ github.token }}' --repository '${{ github.repository_owner }}/varnish' --tag '${{ github.ref_name }}'
       - name: "Delete old container images"
         id: "delete-old-images"
-        uses: "actions/delete-package-versions@v4"
+        uses: "actions/delete-package-versions@v5"
         with:
           package-name: "varnish"
           package-type: "container"
