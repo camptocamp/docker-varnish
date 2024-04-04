@@ -30,7 +30,7 @@ func (v *Varnish) Container() *Container {
 		From("docker.io/varnish:"+version).
 		WithFile("/usr/local/bin/prometheus_varnish_exporter", exporter, binaryFileOpts).
 		WithFile("/usr/local/bin/jq", dag.HTTP("https://github.com/jqlang/jq/releases/download/jq-"+jqVersion+"/jq-linux-amd64"), binaryFileOpts).
-		WithFile("/usr/local/bin/varnish-configuration-loader", dag.Host().File("varnish-configuration-loader"), binaryFileOpts)
+		WithFile("/usr/local/bin/varnish-configuration-loader", dag.CurrentModule().Source().File("varnish-configuration-loader"), binaryFileOpts)
 }
 
 func (v *Varnish) Publish(ctx context.Context, registry string, username string, password string, repository string, tag string) (string, error) {
