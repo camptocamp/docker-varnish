@@ -5,7 +5,7 @@ import (
 )
 
 const (
-	version                   = "7.4.2"
+	version                   = "7.5.0"
 	prometheusExporterVersion = "1.6.1"
 	jqVersion                 = "1.7.1"
 )
