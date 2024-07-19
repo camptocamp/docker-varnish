@@ -1,4 +1,20 @@
 {
   "name": "varnish",
-  "sdk": "go"
+  "sdk": "go",
+  "dependencies": [
+    {
+      "name": "golang",
+      "source": "github.com/camptocamp/daggerverse/golang@16a6c4a8c337532d2c8a5dd8bb2969aedb3cb845"
+    },
+    {
+      "name": "jq",
+      "source": "github.com/camptocamp/daggerverse/jq@b8db11532e3745f05cb0346325f0bf0f0bd51eb4"
+    },
+    {
+      "name": "redhat",
+      "source": "github.com/camptocamp/daggerverse/redhat@f21280f6ba7a0d17c20b88776affcf8fba5cfd87"
+    }
+  ],
+  "source": ".",
+  "engineVersion": "v0.12.0"
 }

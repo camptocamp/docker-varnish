@@ -1,33 +1,91 @@
 ---
-name: "Build"
+name: "Build and publish"
 
 on:
   push:
     tags:
       - "*"
 
-permissions:
-  contents: "read"
-  id-token: "write"
-  packages: "write"
-
 jobs:
-  image:
-    name: "Container Image"
-    runs-on: "ubuntu-latest"
+  build:
+    name: "Build"
+    runs-on: "ubuntu-22.04"
+
+    permissions:
+      contents: "read"
+      packages: "write"
+
+    strategy:
+      matrix:
+        images:
+          - arch: "amd64"
+          - arch: "arm64"
+
+      fail-fast: true
+
     steps:
       - name: "Checkout repository"
         id: "checkout"
         uses: "actions/checkout@v4"
+
       - name: "Set up Dagger"
         id: "setup-dagger"
         uses: "camptocamp/setup-dagger@v1"
         with:
           cloud-token: "${{ secrets.DAGGER_CLOUD_TOKEN }}"
+
+      - name: "Login to GitHub Container Registry"
+        id: "login-registry"
+        uses: "docker/login-action@v3"
+        with:
+          registry: "ghcr.io"
+          username: "${{ github.actor }}"
+          password: "${{ secrets.GITHUB_TOKEN }}"
+
       - name: "Build container image"
         id: "build-image"
         run: |
-          dagger call publish --registry 'ghcr.io' --username '${{ github.actor }}' --password '${{ github.token }}' --repository '${{ github.repository_owner }}/varnish' --tag '${{ github.ref_name }}'
+          echo "$(dagger call container --platform '${{ matrix.images.arch }}' publish --address "ghcr.io/${{ github.repository_owner }}/varnish:${{ github.ref_name }}-${{ matrix.images.arch }}")" > ref
+
+      - name: "Upload reference"
+        id: "upload-reference"
+        uses: "actions/upload-artifact@v4"
+        with:
+          name: "ref-${{ matrix.images.arch }}"
+          path: "ref"
+          if-no-files-found: error
+          retention-days: 1
+
+  publish:
+    name: "Publish"
+    runs-on: "ubuntu-22.04"
+    needs: "build"
+
+    permissions:
+      packages: "write"
+
+    steps:
+      - name: "Login to GitHub Container Registry"
+        id: "login-registry"
+        uses: "docker/login-action@v3"
+        with:
+          registry: "ghcr.io"
+          username: "${{ github.actor }}"
+          password: "${{ secrets.GITHUB_TOKEN }}"
+
+      - name: "Download references"
+        id: "download-references"
+        uses: "actions/download-artifact@v4"
+        with:
+          pattern: "ref-*"
+
+      - name: "Publish manifest"
+        id: "publish-manifest"
+        run: |
+          address='ghcr.io/${{ github.repository_owner }}/varnish:${{ github.ref_name }}'
+          docker manifest create "$address" $(cat ref-*/ref)
+          docker manifest push "$address"
+
       - name: "Delete old container images"
         id: "delete-old-images"
         uses: "actions/delete-package-versions@v5"
