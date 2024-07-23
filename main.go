@@ -110,7 +110,12 @@ func (prometheusExporter *VarnishPrometheusExporter) Binary(
 		WithEnvVariable("GOOS", os).
 		WithEnvVariable("GOARCH", arch).
 		WithMountedDirectory(".", source.Tree()).
-		WithExec([]string{"go", "build", "-ldflags", fmt.Sprintf("-X 'main.Version=%s' -X 'main.VersionHash=%s' -X 'main.VersionDate=%s'", prometheusExporter.Version, commit, time.Now().Format("2006-01-02 15:04:05 -07:00"))}).
+		WithExec([]string{
+			"go", "build", "-ldflags", "-s -w " +
+				fmt.Sprintf("-X 'main.Version=%s'", prometheusExporter.Version) + " " +
+				fmt.Sprintf("-X 'main.VersionHash=%s'", commit) + " " +
+				fmt.Sprintf("-X 'main.VersionDate=%s'", time.Now().Format("2006-01-02 15:04:05 -07:00")),
+		}).
 		File("prometheus_varnish_exporter")
 
 	return binary, nil
