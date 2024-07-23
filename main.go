@@ -20,6 +20,8 @@ const (
 
 	// Varnish Prometheus exporter version
 	PrometheusExporterVersion string = "1.6.1"
+	// Varnish Prometheus exporter binary name
+	PrometheusExporterBinaryName string = "prometheus-varnish-exporter"
 
 	// jq version
 	JqVersion string = "1.7.1"
@@ -111,12 +113,12 @@ func (prometheusExporter *VarnishPrometheusExporter) Binary(
 		WithEnvVariable("GOARCH", arch).
 		WithMountedDirectory(".", source.Tree()).
 		WithExec([]string{
-			"go", "build", "-ldflags", "-s -w " +
+			"go", "build", "-o", PrometheusExporterBinaryName, "-ldflags", "-s -w " +
 				fmt.Sprintf("-X 'main.Version=%s'", prometheusExporter.Version) + " " +
 				fmt.Sprintf("-X 'main.VersionHash=%s'", commit) + " " +
 				fmt.Sprintf("-X 'main.VersionDate=%s'", time.Now().Format("2006-01-02 15:04:05 -07:00")),
 		}).
-		File("prometheus_varnish_exporter")
+		File(PrometheusExporterBinaryName)
 
 	return binary, nil
 }
@@ -143,7 +145,9 @@ func (prometheusExporter *VarnishPrometheusExporter) Overlay(
 
 	overlay := dag.Directory().
 		WithDirectory(prefix, dag.Directory().
-			WithFile("bin/prometheus-varnish-exporter", binary),
+			WithDirectory("bin", dag.Directory().
+				WithFile(PrometheusExporterBinaryName, binary),
+			),
 		)
 
 	return overlay, nil
