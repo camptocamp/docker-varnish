@@ -45,7 +45,7 @@ jobs:
       - name: "Build container image"
         id: "build-image"
         run: |
-          echo "$(dagger call container --platform '${{ matrix.images.arch }}' publish --address "ghcr.io/${{ github.repository_owner }}/varnish:${{ github.ref_name }}-${{ matrix.images.arch }}")" > ref
+          dagger call container --platform '${{ matrix.images.arch }}' publish --address "ghcr.io/${{ github.repository_owner }}/varnish:${{ github.ref_name }}-${{ matrix.images.arch }}" > ref
 
       - name: "Upload reference"
         id: "upload-reference"
@@ -83,7 +83,7 @@ jobs:
         id: "publish-manifest"
         run: |
           address='ghcr.io/${{ github.repository_owner }}/varnish:${{ github.ref_name }}'
-          docker manifest create "$address" $(cat ref-*/ref)
+          docker manifest create "$address" $(sed '$s/$/\n/' ref-*/ref)
           docker manifest push "$address"
 
       - name: "Delete old container images"
