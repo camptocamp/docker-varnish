@@ -24,7 +24,7 @@ const (
 	PrometheusExporterBinaryName string = "prometheus-varnish-exporter"
 
 	// jq version
-	JqVersion string = "1.7.1"
+	JqVersion string = "1.8.1"
 )
 
 // Varnish
