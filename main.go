@@ -14,9 +14,9 @@ const (
 	// Varnish container repository
 	ImageRepository string = "library/varnish"
 	// Varnish container tag
-	ImageTag string = "7.6.5"
+	ImageTag string = "8.0.0"
 	// Varnish container digest (RepoDigests from `docker image inspect`)
-	ImageDigest string = "sha256:85580f7b7a622bdb652357242337cd5268be7779356dc04658179d60649b5ebf"
+	ImageDigest string = "sha256:bb543e8e199894e126d12e9dabc9e23a185b2eb641f29e906a1d26d8ffe1be93"
 
 	// Varnish Prometheus exporter version
 	PrometheusExporterVersion string = "1.6.1"
