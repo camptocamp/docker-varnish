@@ -75,7 +75,7 @@ jobs:
 
       - name: "Download references"
         id: "download-references"
-        uses: "actions/download-artifact@v7"
+        uses: "actions/download-artifact@v8"
         with:
           pattern: "ref-*"
 
